@@ -1,0 +1,43 @@
+[general]
+profile = profile.tizen.unified
+
+[profile.tizen.unified]
+obs = obs.tizen
+
+# arm64
+#repos = repo.tizen.unified.base.arm.64,repo.tizen.unified
+# arm
+repos = repo.tizen.unified.base.arm,repo.tizen.unified
+# i586 (ia32)
+#repos = repo.tizen.unified.base.ia.32,repo.tizen.unified
+# i586 (x86_64)
+#repos = repo.tizen.unified.base.x86.64,repo.tizen.unified
+# emulator32
+#repos = repo.tizen.unified.base.emulator.32,repo.tizen.unified
+# emulator64
+#repos = repo.tizen.unified.base.emulator.64,repo.tizen.unified
+
+[obs.tizen]
+url = http://build.tizen.org
+
+[repo.tizen.unified]
+url = http://download.tizen.org/snapshots/tizen/unified/latest/repos/standard/packages/
+
+[repo.tizen.unified.base.arm.64]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/arm64/packages/
+
+[repo.tizen.unified.base.arm]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/arm/packages/
+
+[repo.tizen.unified.base.ia.32]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/ia32/packages/
+
+[repo.tizen.unified.base.x86.64]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/x86_64/packages/
+
+[repo.tizen.unified.base.emulator.32]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/emulator32/packages/
+
+[repo.tizen.unified.base.emulator.64]
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/emulator64/packages/
+
