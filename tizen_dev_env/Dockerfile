@@ -8,6 +8,7 @@ ARG GIT_USER_NAME
 ARG GIT_EMAIL
 ARG TIZEN_SSH_USER_ID
 ARG TIZEN_SSH_EMAIL
+ARG HOME_DIR
 
 ENV USER $USER
 ENV UID $UID
@@ -16,9 +17,34 @@ ENV GIT_USER_NAME ${GIT_USER_NAME}
 ENV GIT_EMAIL ${GIT_EMAIL}
 ENV TIZEN_SSH_USER_ID ${TIZEN_SSH_USER_ID}
 ENV TIZEN_SSH_EMAIL ${TIZEN_SSH_EMAIL}
+ENV HOME_DIR ${HOME_DIR}
+
+RUN echo "git_user_name=${GIT_USER_NAME}"
+RUN echo "git_email=${GIT_EMAIL}"
+RUN echo "tizen_ssh_user_id=${TIZEN_SSH_USER_ID}"
+RUN echo "tizen_ssh_email=${TIZEN_SSH_EMAIL}"
+RUN echo "home_dir=${HOME_DIR}"
 
 RUN useradd -m -s $SHELL $USER -u $UID -G sudo
 RUN echo "user=$USER, uid=$UID, shell=$SHELL"
+
+RUN mkdir -p /workspace/scripts
+RUN mkdir -p /workspace/gbs_config
+RUN mkdir -p /workspace/gits/tizen.org
+COPY ./gbs.conf.* /workspace/gbs_config/
+
+RUN chown -R ${USER}.${USER} /workspace
+
+RUN echo "nameserver 10.32.192.11" > /etc/resolv.conf
+
+# COPY or Create ssh key inside docker image
+#RUN mkdir -p /home/${USER}/.ssh
+#RUN ssh-keygen -trsa -C ${TIZEN_SSH_EMAIL} -f /home/${USER}/.ssh/id_rsa -P ""
+
+#Needed to fix
+RUN mkdir -p /home/${USER}/.ssh
+#WORKDIR $HOME
+ADD .ssh/id_rsa* /home/${USER}/.ssh/
 
 # Set http/https proxy information
 #ENV http_proxy="http://10.112.1.184:8080/"
@@ -36,26 +62,11 @@ RUN apt-get update
 RUN apt-get -qq -y install git vim build-essential
 RUN apt-get -qq -y --allow-unauthenticated install gbs sdb
 
-RUN mkdir -p /workspace/scripts
-RUN mkdir -p /workspace/gbs_config
-RUN mkdir -p /workspace/gits/tizen.org
-COPY ./gbs.conf.* /workspace/gbs_config/
-
-RUN echo "scp -p -P 29418 ${TIZEN_SSH_USER_ID}@review.tizen.org:hooks/commit-msg .git/hooks" >> /workspace/gits/gerrit_hook_install.sh
-RUN chmod +x /workspace/gits/gerrit_hook_install.sh
-
-RUN chown -R ${USER}.${USER} /workspace
-
 RUN git config --global user.name ${GIT_USER_NAME}
 RUN git config --global user.email ${GIT_EMAIL}
 RUN echo "git user nam=${GIT_USER_NAME}, git email=${GIT_EMAIL}"
 
-RUN echo "nameserver 10.32.192.11" > /etc/resolv.conf
-
-# COPY or Create ssh key inside docker image
-RUN ssh-keygen -trsa -C ${TIZEN_SSH_EMAIL} -f /home/${USER}/.ssh/id_rsa -P ""
-
-#Needed to fix
-#COPY /home/$USER/.ssh/id_rsa* /home/$USER/.ssh/
+RUN echo "scp -p -P 29418 ${TIZEN_SSH_USER_ID}@review.tizen.org:hooks/commit-msg .git/hooks" >> /workspace/gits/gerrit_hook_install.sh
+RUN chmod +x /workspace/gits/gerrit_hook_install.sh
 
 CMD ["/bin/bash"]
