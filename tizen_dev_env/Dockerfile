@@ -59,20 +59,37 @@ ENV https_proxy $https_proxy
 ENV no_proxy $no_proxy
 RUN echo "export http_proxy=$http_proxy" >> /etc/profile
 RUN echo "export https_proxy=$https_proxy" >> /etc/profile
-RUN echo "export no_proxy=$no_proxy" >> /etc/profile
+RUN echo "export no_proxy='$no_proxy'" >> /etc/profile
 RUN echo "export http_proxy=$http_proxy" >> /root/.bashrc
 RUN echo "export https_proxy=$https_proxy" >> /root/.bashrc
-RUN echo "export no_proxy=$no_proxy" >> /root/.bashrc
+RUN echo "export no_proxy='$no_proxy'" >> /root/.bashrc
 RUN echo "export http_proxy=$http_proxy" >> /home/${USER_NAME}/.bashrc
 RUN echo "export https_proxy=$https_proxy" >> /home/${USER_NAME}/.bashrc
-RUN echo "export no_proxy=$no_proxy" >> /home/${USER_NAME}/.bashrc
+RUN echo "export no_proxy='$no_proxy'" >> /home/${USER_NAME}/.bashrc
+
+# date setting
+RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+# Java
+COPY jdk-8u131-linux-x64.tar.gz /usr/lib/jvm/jdk-8u131-linux-x64.tar.gz
+RUN tar -zxf /usr/lib/jvm/jdk-8u131-linux-x64.tar.gz -C /usr/lib/jvm/
+RUN echo "JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131/" >> /etc/environment
+RUN echo "CLASSPATH=JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131/lib" >> /etc/environment
+RUN echo "PATH=$PATH:/usr/lib/jvm/jdk1.8.0_131/bin" >> /etc/environment
+RUN update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.8.0_131/bin/java" 1
+RUN update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.8.0_131/bin/javac" 1
+RUN update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.8.0_131/bin/javaws" 1
+RUN /bin/bash -c 'source /etc/environment'
+RUN update-alternatives --set java /usr/lib/jvm/jdk1.8.0_131/bin/java
+RUN update-alternatives --set javac /usr/lib/jvm/jdk1.8.0_131/bin/javac
+RUN update-alternatives --set javaws /usr/lib/jvm/jdk1.8.0_131/bin/javaws
 
 # Add tizen development tools repo into apt information
 RUN echo "deb http://download.tizen.org/tools/latest-release/Ubuntu_16.04/ /" >> /etc/apt/sources.list
 RUN apt-get update
 
 # Install basic package
-RUN apt-get -qq -y install git vim build-essential software-properties-common
+RUN apt-get -qq -y install git vim build-essential software-properties-common tree unzip
 RUN apt-get -qq -y --allow-unauthenticated install gbs sdb cpio git git-core sshpass wget
 
 #RUN mkdir -p /etc/resolvconf/resolv.conf.d/
@@ -88,7 +105,7 @@ RUN chown -R ${USER_NAME}.${USER_NAME} /workspace
 
 # Add a user into sudoers
 RUN echo "Defaults        env_keep += \"http_proxy https_proxy ftp_proxy no_proxy\"" >> /etc/sudoers
-RUN echo "${USER_NAME} ALL=(ALL:ALL) ALL" >> /etc/sudoers
+RUN echo "${USER_NAME} ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 # Update nameserver information
 RUN echo "echo 'nameserver 10.32.192.11' > /etc/resolv.conf" > /usr/bin/add_ns.sh
