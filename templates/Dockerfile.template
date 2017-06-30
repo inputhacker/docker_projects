@@ -1,0 +1,66 @@
+## Base information
+FROM {name}:{version}
+#E.g FROM ubuntu:16.04
+MAINTAINER {maintainer}
+#E.g MAINTAINER Sung-Jin Park <sj76.park@samsung.com>
+
+## Proxy setting ##
+ENV http_proxy {http protoxy info}
+ENV https_proxy {https protoxy info}
+ENV no_proxy {addresses which don't need to use proxy}
+#E.g ENV http_proxy 'http://111.222.111.222:8080'
+#E.g ENV https_proxy 'https://111.222.111.222:8080'
+#E.g ENV no_proxy '127.0.0.1, localhost, 111.222.111.100, 111.222.111.200'
+
+## Copy trusted certificate ##
+ENV CERTIFICATE_PATH=/usr/share/ca-certificates/extra
+RUN mkdir -p ${CERTIFICATE_PATH}
+COPY xxx.crt ${CERTIFICATE_PATH}/xxx.crt
+
+## Update package information
+RUN apt-get update
+
+RUN apt-get install -y ca-certificates
+
+RUN update-ca-certificates
+
+## Copy a user's ssh key
+ENV SSH_PATH=/home/{user_name}/.ssh
+RUN mkdir -p ${SSH_PATH}/
+COPY ssh/id_rsa ${SSH_PATH}/id_rsa
+COPY ssh/id_rsa.pub ${SSH_PATH}/id_rsa.pub
+COPY ssh/known_hosts ${SSH_PATH}/known_hosts
+COPY ssh/config ${SSH_PATH}/config
+
+# date setting
+RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+# gbs config file
+COPY ./gbs.conf /root/.gbs.conf
+
+# Java
+COPY jdk-8u91-linux-x64.tar.gz /usr/lib/jvm/jdk-8u91-linux-x64.tar.gz
+RUN tar -zxf /usr/lib/jvm/jdk-8u91-linux-x64.tar.gz -C /usr/lib/jvm/
+RUN echo "JAVA_HOME=/usr/lib/jvm/jdk1.8.0_91/" >> /etc/environment
+RUN echo "CLASSPATH=JAVA_HOME=/usr/lib/jvm/jdk1.8.0_91/lib" >> /etc/environment
+RUN echo "PATH=$PATH:/usr/lib/jvm/jdk1.8.0_91/bin" >> /etc/environment
+RUN update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.8.0_91/bin/java" 1
+RUN update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.8.0_91/bin/javac" 1
+RUN update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.8.0_91/bin/javaws" 1
+RUN /bin/bash -c 'source /etc/environment'
+RUN update-alternatives --set java /usr/lib/jvm/jdk1.8.0_91/bin/java
+RUN update-alternatives --set javac /usr/lib/jvm/jdk1.8.0_91/bin/javac
+RUN update-alternatives --set javaws /usr/lib/jvm/jdk1.8.0_91/bin/javaws
+
+## PACKAGES ##
+# Add gbs repo
+RUN echo "deb http://download.tizen.org/tools/latest-release/Ubuntu_16.04 /" >> /etc/apt/sources.list
+RUN cat /etc/apt/sources.list
+
+# Install base packages
+RUN apt-get update
+RUN apt-get install -y vim tree wget unzip software-properties-common
+RUN apt-get install -y --allow-unauthenticated gbs git git-core build-essential cpio sshpass
+
+COPY print_patchset_after_last_accept.sh /usr/bin/
+

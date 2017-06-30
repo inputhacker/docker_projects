@@ -84,6 +84,8 @@ RUN update-alternatives --set java /usr/lib/jvm/jdk1.8.0_131/bin/java
 RUN update-alternatives --set javac /usr/lib/jvm/jdk1.8.0_131/bin/javac
 RUN update-alternatives --set javaws /usr/lib/jvm/jdk1.8.0_131/bin/javaws
 
+CMD java -XX:+PrintFlagsFinal -XX:+PrintGCDetails $JAVA_OPTIONS -jar java-container.jar
+
 # Add tizen development tools repo into apt information
 RUN echo "deb http://download.tizen.org/tools/latest-release/Ubuntu_16.04/ /" >> /etc/apt/sources.list
 RUN apt-get update
