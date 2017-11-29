@@ -4,6 +4,9 @@ profile = profile.tizen.unified
 [profile.tizen.unified]
 obs = obs.tizen
 
+user = @tizen_obs_id@
+#passwdx =
+
 # arm64
 #repos = repo.tizen.unified.base.arm.64,repo.tizen.unified
 # arm
@@ -21,13 +24,14 @@ repos = repo.tizen.unified.base.arm,repo.tizen.unified
 url = http://build.tizen.org
 
 [repo.tizen.unified]
+#url = http://download.tizen.org/snapshots/tizen/unified/tizen-unified_20171120.2/repos/standard/packages/
 url = http://download.tizen.org/snapshots/tizen/unified/latest/repos/standard/packages/
 
 [repo.tizen.unified.base.arm.64]
 url = http://download.tizen.org/snapshots/tizen/base/latest/repos/arm64/packages/
 
 [repo.tizen.unified.base.arm]
-url = http://download.tizen.org/snapshots/tizen/base/latest/repos/arm/packages/
+url = http://download.tizen.org/snapshots/tizen/base/latest/repos/standard/packages/
 
 [repo.tizen.unified.base.ia.32]
 url = http://download.tizen.org/snapshots/tizen/base/latest/repos/ia32/packages/

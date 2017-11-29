@@ -3,11 +3,14 @@
 function usage
 {
 	echo "$0 {TAG} {WORK_DIR} {GIT_USER_NAME} {GIT_EMAIL} {TIZEN_SSH_USER_ID} {TIZEN_SSH_EMAIL}"
-	echo "$0 ubuntu_tizen . 'Sung-Jin Park' input.hacker@gmail.com sj76park sj76.park@samsung.com"
+	echo "example> $0 ubuntu_tizen . 'Sung-Jin Park' input.hacker@gmail.com sj76park sj76.park@samsung.com"
 	exit
 }
 
-echo "user=${USER}, home=${HOME}"
+USER_ID=`id -u`
+GROUP_ID=`id -g`
+
+echo "user=${USER}, home=${HOME}, USER_ID=${USER_ID}, GROUP_ID=${GROUP_ID}"
 
 if [ "$1" = "" ]; then
 	usage
@@ -46,16 +49,14 @@ fi
 cp -af ${HOME}/.ssh .
 
 sudo cp -af /etc/sudoers .
-sudo chown inputhacker.inputhacker ./sudoers
+sudo chown ${USER_ID}.${GROUP_ID} ./sudoers
 
 if [ "${no_proxy}" = "" ]; then
 	export no_proxy="'127.0.0.1, localhost, 10.113.63.32, 165.213.149.170, 10.113.138.35, 10.252.249.230, 165.213.149.200'"
 fi
 
-export JAVA_OPTIONS='-Xmx300m'
-
 #use of cache
-docker build --build-arg GIT_USER_NAME="${GIT_USER_NAME}" --build-arg GIT_EMAIL="${GIT_EMAIL}" --build-arg TIZEN_SSH_USER_ID="${TIZEN_SSH_USER_ID}" --build-arg TIZEN_SSH_EMAIL="${TIZEN_SSH_EMAIL}"  --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy="$no_proxy" --build-arg USER_NAME=$USER --build-arg USER_ID=$UID --build-arg USER_SHELL=$SHELL --build-arg USER_HOME="${HOME}" --no-cache=false -t ${TAG} ${WORK_DIR}
+docker build --build-arg GIT_USER_NAME="${GIT_USER_NAME}" --build-arg GIT_EMAIL="${GIT_EMAIL}" --build-arg TIZEN_SSH_USER_ID="${TIZEN_SSH_USER_ID}" --build-arg TIZEN_SSH_EMAIL="${TIZEN_SSH_EMAIL}"  --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy="$no_proxy" --build-arg USER_NAME=$USER --build-arg USER_ID=$USER_UD --build-arg USER_SHELL=$SHELL --build-arg USER_HOME="${HOME}" --no-cache=false -t ${TAG} ${WORK_DIR}
 
 #no use of cache
 #docker build --build-arg GIT_USER_NAME="${GIT_USER_NAME}" --build-arg GIT_EMAIL="${GIT_EMAIL}" --build-arg TIZEN_SSH_USER_ID="${TIZEN_SSH_USER_ID}" --build-arg TIZEN_SSH_EMAIL="${TIZEN_SSH_EMAIL}"  --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy="$no_proxy" --build-arg USER_NAME=$USER --build-arg USER_ID=$UID --build-arg USER_SHELL=$SHELL --build-arg USER_HOME="${HOME}" --no-cache=true -t ${TAG} ${WORK_DIR}

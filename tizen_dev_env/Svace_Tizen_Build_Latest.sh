@@ -1,1 +1,0 @@
-Svace_Tizen_Build_2.3.0.3.sh

@@ -32,9 +32,8 @@ RUN echo "user=${USER_NAME}, uid=${USER_ID}, shell=${USER_SHELL}"
 RUN mkdir -p /workspace/scripts
 RUN mkdir -p /workspace/gbs_config
 RUN mkdir -p /workspace/gits/tizen.org
+RUN mkdir -p /workspace/gits/efl_upgrade/
 COPY ./gbs.conf.* /workspace/gbs_config/
-COPY Svace_Tizen_Build_Latest.sh /workspace/infra/svace/Svace_Tizen_Build_Latest.sh
-RUN chmod +x /workspace/infra/svace/Svace_Tizen_Build_Latest.sh
 RUN chown -R ${USER_NAME}.${USER_NAME} /workspace
 
 # COPY or Create ssh key inside docker image
@@ -70,22 +69,6 @@ RUN echo "export no_proxy='$no_proxy'" >> /home/${USER_NAME}/.bashrc
 # date setting
 RUN ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
-# Java
-COPY jdk-8u131-linux-x64.tar.gz /usr/lib/jvm/jdk-8u131-linux-x64.tar.gz
-RUN tar -zxf /usr/lib/jvm/jdk-8u131-linux-x64.tar.gz -C /usr/lib/jvm/
-RUN echo "JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131/" >> /etc/environment
-RUN echo "CLASSPATH=JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131/lib" >> /etc/environment
-RUN echo "PATH=$PATH:/usr/lib/jvm/jdk1.8.0_131/bin" >> /etc/environment
-RUN update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.8.0_131/bin/java" 1
-RUN update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.8.0_131/bin/javac" 1
-RUN update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.8.0_131/bin/javaws" 1
-RUN /bin/bash -c 'source /etc/environment'
-RUN update-alternatives --set java /usr/lib/jvm/jdk1.8.0_131/bin/java
-RUN update-alternatives --set javac /usr/lib/jvm/jdk1.8.0_131/bin/javac
-RUN update-alternatives --set javaws /usr/lib/jvm/jdk1.8.0_131/bin/javaws
-
-CMD java -XX:+PrintFlagsFinal -XX:+PrintGCDetails $JAVA_OPTIONS -jar java-container.jar
-
 # Add tizen development tools repo into apt information
 RUN echo "deb http://download.tizen.org/tools/latest-release/Ubuntu_16.04/ /" >> /etc/apt/sources.list
 RUN apt-get update
@@ -115,6 +98,11 @@ RUN chmod +x /usr/bin/add_ns.sh
 RUN /usr/bin/add_ns.sh
 RUN echo "sudo /usr/bin/add_ns.sh" >> /home/${USER_NAME}/.bashrc
 RUN echo "/usr/bin/add_ns.sh" >> /root/.bashrc
+
+#efl_upgrade setup and build
+COPY ./efl_upgrade/* /workspace/gits/efl_upgrade/
+RUN chmod +x /workspace/gits/efl_upgrade/*.sh
+RUN /workspace/gits/efl_upgrade/efl_upgrade_setup.sh
 
 USER ${USER_NAME}
 WORKDIR ~
